@@ -1,0 +1,54 @@
+Bien qu'il s'agisse d'un modèle plutôt similaire à Decision Tree Classifier. Il existe toute de même une différente notable dans l'approche. Random Forest Classifier est également un apprentissage supervisé ou nous avons un grand nombre d'arbres de décision construits chacun avec un sous-échantillon différent de l'ensemble d'apprentissage.
+Pour chaque construction d'arbre, la décision à un noeud est fait en fonction d'un sous-ensemble de variables tirées au hasard.
+
+rf_clf = RandomForestClassifier(n_estimators=200, n_jobs=-1, random_state=42)
+rf_clf.fit(X_train, y_train)
+y_pred = rf_clf.predict(X_test)
+pd.crosstab(y_test, y_pred, rownames=['Classe réelle'], colnames=['Classe prédit'])
+
+rf_clf.score(X_test, y_test)
+
+feats = {}
+for feature, importance in zip(data.columns, rf_clf.feature_importances_):
+    feats[feature] = importance
+    
+importances = pd.DataFrame.from_dict(feats, orient='index').rename(columns={0: 'Importance'})
+importances.sort_values(by='Importance', ascending=False).head(8)
+
+test_pred2 = rf_clf.predict(X_test)
+print("Précision de la prédiction :", metrics.accuracy_score(y_test, test_pred2)*100, '%')
+print("Evaluation détaillée de la Classification par RDF :\n \n" ,
+      (metrics.classification_report(y_test, test_pred2)))
+      
+Une fois encore, que ce soit la précision ou le F1-score, l'ensemble des résultats est excellent pour ce modèle (1.00). Le recall oscille entre 0.99 et 1.0 quant à lui.
+
+cnf_matrix2 = metrics.confusion_matrix(y_test, test_pred2)
+print(cnf_matrix2)
+
+classes = range(0,2)
+plt.figure()
+
+plt.imshow(cnf_matrix2, interpolation='nearest',cmap='Blues')
+plt.title("Matrice de confusion")
+plt.colorbar()
+tick_marks = np.arange(len(classes))
+plt.xticks(tick_marks, classes)
+plt.yticks(tick_marks, classes)
+
+for i, j in itertools.product(range(cnf_matrix2.shape[0]), range(cnf_matrix2.shape[1])):
+    plt.text(j, i, cnf_matrix2[i, j],
+             horizontalalignment = "center",
+             color = "white" if cnf_matrix2[i, j] > ( cnf_matrix2.max() / 2) else "black")
+
+plt.ylabel('Vrais labels')
+plt.xlabel('Labels prédits')
+plt.show()
+
+Comme le modèle précédent, ce modèle semble plus à même de prédire les campagnes vouées à l'échec que les campagnes à succès.
+On remarque d'ailleurs qu'il s'est moins trompé dans la prédiction des échecs qui se sont avérés être des succès.
+
+pd.DataFrame({'Campagnes_observées': (y_test*ec)+moy, 'Campagnes_predites' : np.round((test_pred2*ec)+moy)},
+             index = X_test.index).head(20)
+             
+
+Ce modèle semble très bien prédire le statut des campagnes dans la grande majorité des cas.
