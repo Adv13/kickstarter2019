@@ -1,0 +1,86 @@
+En choisissant Decision Tree Classifier, cela nous permet d'effectuer un apprentissage supervisé ou l'agorithme sélectionne automatiquement les variables les plus pertinentes à partir des données.
+Cela permet alors de mettre en avant des règles logiques de cause à effet (des déterminismes) qui n'apparaissaient pas forcement initialement.
+
+dt_clf = DecisionTreeClassifier(random_state=42)
+dt_clf.fit(X_train, y_train)
+y_pred = dt_clf.predict(X_test)
+pd.crosstab(y_test, y_pred, rownames=['Classe réelle'], colnames=['Classe prédit'])
+
+dt_clf.score(X_test, y_test)
+
+feats = {}
+for feature, importance in zip(data.columns, dt_clf.feature_importances_):
+    feats[feature] = importance
+    
+importances = pd.DataFrame.from_dict(feats, orient='index').rename(columns={0: 'Importance'})
+importances.sort_values(by='Importance', ascending=False).head(8)
+
+Par curiosité, recommencons avec une mesure d'impureté.
+
+dt_clf_gini = DecisionTreeClassifier(criterion = "gini", random_state=42)
+dt_clf_gini.fit(X_train, y_train)
+y_pred = dt_clf_gini.predict(X_test)
+pd.crosstab(y_test, y_pred, rownames=['Classe réelle'], colnames=['Classe prédite'])
+
+dt_clf_gini.score(X_test, y_test)
+
+feats = {}
+for feature, importance in zip(data.columns, dt_clf_gini.feature_importances_):
+    feats[feature] = importance 
+
+importances = pd.DataFrame.from_dict(feats, orient='index').rename(columns={0: 'Gini-importance'})
+importances.sort_values(by='Gini-importance', ascending = False ).head(8)
+
+Affichons plus de métriques ci-dessous pour évaluer notre modèle.
+
+from matplotlib import cm # Pour importer de nouvelles cartes de couleur
+
+from sklearn.model_selection import train_test_split # Pour répartir les données
+from sklearn.model_selection import GridSearchCV, cross_val_score # Pour évaluer un modèle
+from sklearn import metrics 
+
+import itertools 
+
+test_pred = dt_clf.predict(X_test)
+print("Précision de la prédiction :", metrics.accuracy_score(y_test, test_pred)*100, '%')
+print("Evaluation détaillée de la Classification par RDF :\n \n" ,
+      (metrics.classification_report(y_test, test_pred)))
+      
+Que ce soit la précision, le recall, ou le F1-score, l'ensemble des résultats est excellent pour ce modèle puisqu'égal à 1.0.
+
+cnf_matrix = metrics.confusion_matrix(y_test, test_pred)
+print(cnf_matrix)
+
+classes = range(0,2)
+plt.figure()
+
+plt.imshow(cnf_matrix, interpolation='nearest',cmap='Blues')
+plt.title("Matrice de confusion")
+plt.colorbar()
+tick_marks = np.arange(len(classes))
+plt.xticks(tick_marks, classes)
+plt.yticks(tick_marks, classes)
+
+for i, j in itertools.product(range(cnf_matrix.shape[0]), range(cnf_matrix.shape[1])):
+    plt.text(j, i, cnf_matrix[i, j],
+             horizontalalignment = "center",
+             color = "white" if cnf_matrix[i, j] > ( cnf_matrix.max() / 2) else "black")
+
+plt.ylabel('Vrais labels')
+plt.xlabel('Labels prédits')
+plt.show()
+
+Le modèle semble plus à même de prédire les campagnes vouées à l'échec que les campagnes à succès car il fait moins d'erreurs dans ces dernières.
+
+scaler = preprocessing.StandardScaler().fit(df_final)
+moy = scaler.mean_[-1]
+ec = scaler.scale_[-1]
+
+print("moyenne :", moy)
+print("ecart-type", ec)
+
+Prédictions :
+pd.DataFrame({'Campagnes_observées': (y_test*ec)+moy, 'Campagnes_predites' : np.round((test_pred*ec)+moy)},
+             index = X_test.index).head(20)
+             
+Ce modèle semble très bien prédire le statut des campagnes dans la grande majorité des cas.
