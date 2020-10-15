@@ -1,0 +1,394 @@
+La datasets pour ce travail proviennent de https://webrobots.io/kickstarter-datasets/
+Les fichiers en CSV ne sont pas utilisés car 2 des 5 colonnes présentes en format JSON dans ces derniers comportent des erreurs d'encodage.
+
+
+#IMPORT LIBRARIES
+import pandas as pd
+import numpy as np
+%matplotlib inline
+import matplotlib.pyplot as plt
+import seaborn as sns
+import json
+from pandas import json_normalize
+
+# import files
+customer_json_file1 = 'Kickstarter_2019-01-17T03_20_02_630Z.json'
+customer_json_file2 = 'Kickstarter_2019-02-14T03_20_04_734Z.json'
+customer_json_file3 = 'Kickstarter_2019-03-14T03_20_12_200Z.json'
+customer_json_file4 = 'Kickstarter_2019-04-18T03_20_02_220Z.json'
+customer_json_file5 = 'Kickstarter_2019-05-16T03_20_20_822Z.json'
+customer_json_file6 = 'Kickstarter_2019-06-13T03_20_35_801Z.json'
+customer_json_file7 = 'Kickstarter_2019-07-18T03_20_05_009Z.json'
+customer_json_file8 = 'Kickstarter_2019-08-15T03_20_03_022Z.json'
+customer_json_file9 = 'Kickstarter_2019-09-12T03_20_06_215Z.json'
+customer_json_file10 = 'Kickstarter_2019-10-17T03_20_19_421Z.json'
+customer_json_file11 = 'Kickstarter_2019-11-14T03_20_27_004Z.json'
+customer_json_file12 = 'Kickstarter_2019-12-12T03_20_05_306Z.json'
+
+Lire les fichiers dans des df rangés par mois pour l'année 2019 :
+
+Janvier = df_2019_1
+Février = df_2019_2
+Mars = df_2019_3
+Avril = df_2019_4
+Mai = df_2019_5
+Juin = df_2019_6
+Juillet = df_2019_7
+Aout = df_2019_8
+Septembre = df_2019_9
+Octobre = df_2019_10
+Novembre = df_2019_11
+Decembre = df_2019_12
+
+df_2019_1 = pd.read_json(customer_json_file1,
+   convert_dates=True, lines=True)
+
+df_2019_2 = pd.read_json(customer_json_file2,
+   convert_dates=True, lines=True)
+
+df_2019_3 = pd.read_json(customer_json_file3,
+   convert_dates=True, lines=True)
+
+df_2019_4 = pd.read_json(customer_json_file4,
+   convert_dates=True, lines=True)
+
+df_2019_5 = pd.read_json(customer_json_file5,
+   convert_dates=True, lines=True)
+
+df_2019_6 = pd.read_json(customer_json_file6,
+   convert_dates=True, lines=True)
+
+df_2019_7 = pd.read_json(customer_json_file7,
+   convert_dates=True, lines=True)
+
+df_2019_8 = pd.read_json(customer_json_file8,
+   convert_dates=True, lines=True)
+
+df_2019_9 = pd.read_json(customer_json_file9,
+   convert_dates=True, lines=True)
+
+df_2019_10 = pd.read_json(customer_json_file10,
+   convert_dates=True, lines=True)
+
+df_2019_11 = pd.read_json(customer_json_file11,
+   convert_dates=True, lines=True)
+
+df_2019_12 = pd.read_json(customer_json_file12,
+   convert_dates=True, lines=True)
+   
+   
+df_2019_1.head()
+   
+Extraire les données de la colonne data pour chaque df de l'année 2019.
+A noter que toutes les manoeuvres effectuées dans la partie 1 de ce notebook ont été regroupées pour faciliter votre lecture.
+Néanmoins, les cellules n'ont pas été relancées car un problème de mémoire saturée apparaît à chaque fois que les lignes de code sont regroupées au lieu d'être séparées
+dans plusieurs cellules pour être exécutées. Tel que l'exemple ci-dessous.
+
+df_2019_1 = df_2019_1.join(json_normalize(df_2019_1["data"].tolist()).add_prefix("data.")).drop(["data"], axis=1)
+df_2019_2 = df_2019_2.join(json_normalize(df_2019_2["data"].tolist()).add_prefix("data.")).drop(["data"], axis=1)
+df_2019_3 = df_2019_3.join(json_normalize(df_2019_3["data"].tolist()).add_prefix("data.")).drop(["data"], axis=1)
+df_2019_4 = df_2019_4.join(json_normalize(df_2019_4["data"].tolist()).add_prefix("data.")).drop(["data"], axis=1)
+df_2019_5 = df_2019_5.join(json_normalize(df_2019_5["data"].tolist()).add_prefix("data.")).drop(["data"], axis=1)
+df_2019_6 = df_2019_6.join(json_normalize(df_2019_6["data"].tolist()).add_prefix("data.")).drop(["data"], axis=1)
+df_2019_7 = df_2019_7.join(json_normalize(df_2019_7["data"].tolist()).add_prefix("data.")).drop(["data"], axis=1)
+df_2019_8 = df_2019_8.join(json_normalize(df_2019_8["data"].tolist()).add_prefix("data.")).drop(["data"], axis=1)
+df_2019_9 = df_2019_9.join(json_normalize(df_2019_9["data"].tolist()).add_prefix("data.")).drop(["data"], axis=1)
+df_2019_10 = df_2019_10.join(json_normalize(df_2019_10["data"].tolist()).add_prefix("data.")).drop(["data"], axis=1)
+df_2019_11 = df_2019_11.join(json_normalize(df_2019_11["data"].tolist()).add_prefix("data.")).drop(["data"], axis=1)
+df_2019_12 = df_2019_12.join(json_normalize(df_2019_12["data"].tolist()).add_prefix("data.")).drop(["data"], axis=1)
+
+Enregistrement des df obtenus en fichiers csv
+
+df_2019_1.to_csv( "df_2019_1.csv", index=False, encoding='utf-8-sig')
+df_2019_2.to_csv( "df_2019_2.csv", index=False, encoding='utf-8-sig')
+df_2019_3.to_csv( "df_2019_3.csv", index=False, encoding='utf-8-sig')
+df_2019_4.to_csv( "df_2019_4.csv", index=False, encoding='utf-8-sig')
+df_2019_5.to_csv( "df_2019_5.csv", index=False, encoding='utf-8-sig')
+df_2019_6.to_csv( "df_2019_6.csv", index=False, encoding='utf-8-sig')
+df_2019_7.to_csv( "df_2019_7.csv", index=False, encoding='utf-8-sig')
+df_2019_8.to_csv( "df_2019_8.csv", index=False, encoding='utf-8-sig')
+df_2019_9.to_csv( "df_2019_9.csv", index=False, encoding='utf-8-sig')
+df_2019_10.to_csv( "df_2019_10.csv", index=False, encoding='utf-8-sig')
+df_2019_11.to_csv( "df_2019_11.csv", index=False, encoding='utf-8-sig')
+df_2019_12.to_csv( "df_2019_12.csv", index=False, encoding='utf-8-sig')
+
+import os
+import glob
+
+Ci dessous, nous avons donc décidé de supprimer les colonnes vides et les colonnes non pertinentes pour notre projet.
+Nous avons également décidé d'afficher au max les lignes pour plus de visibilité lorsqu'il s'agit d'afficher les df.columns.
+Dans l'ordre pour chaque df : lecture, affichage, suppression des colonnes, affichages des NaN, suppression des NaN et dernier affichage pour checker le travail.
+Ensuite, nous enregistrons les df sous un nouveau fichier csv "cleaned".
+
+pd.set_option('display.max_rows', None)
+
+df1 = pd.read_csv('df_2019_1.csv')
+df2 = pd.read_csv('df_2019_2.csv')
+df3 = pd.read_csv('df_2019_3.csv')
+df4 = pd.read_csv('df_2019_4.csv')
+df5 = pd.read_csv('df_2019_5.csv')
+df6 = pd.read_csv('df_2019_6.csv')
+df7 = pd.read_csv('df_2019_7.csv')
+df8 = pd.read_csv('df_2019_8.csv')
+df9 = pd.read_csv('df_2019_9.csv')
+df10 = pd.read_csv('df_2019_10.csv')
+df11 = pd.read_csv('df_2019_11.csv')
+df12 = pd.read_csv('df_2019_12.csv')
+
+df1.columns
+df1.drop(['data.friends', 'data.is_starred', 'data.is_backing','data.permissions','data.urls.api.star',
+          'data.urls.api.message_creator','data.urls.web.message_creator','data.profile.background_image_attributes.id',
+          'data.profile.background_image_attributes.image_urls.default',
+          'data.profile.background_image_attributes.image_urls.baseball_card','data.profile.feature_image_attributes.id',
+          'data.profile.link_text', 'data.profile.link_url','data.profile.blurb', 'data.creator.is_registered',
+          'data.creator.chosen_currency','data.profile.name','robot_id','data.creator.slug',
+          'data.profile.feature_image_attributes.image_urls.baseball_card',
+          'data.profile.feature_image_attributes.image_urls.default','data.profile.background_image_opacity',
+          'data.profile.background_color','data.urls.web.project','data.photo.full', 'data.photo.ed','data.photo.med',
+          'data.photo.little','data.photo.small','data.photo.thumb','data.photo.1024x576','data.photo.1536x864',
+          'data.profile.text_color', 'data.profile.link_background_color', 'data.profile.link_text_color'],
+         axis=1, inplace=True)
+df1.isna().sum()
+df1.dropna(how='any', inplace=True)
+df1.isna().sum()
+
+df2.columns
+df2.drop(['data.friends', 'data.is_starred', 'data.is_backing','data.permissions','data.urls.api.star',
+          'data.urls.api.message_creator','data.urls.web.message_creator','data.profile.background_image_attributes.id',
+          'data.profile.background_image_attributes.image_urls.default',
+          'data.profile.background_image_attributes.image_urls.baseball_card','data.profile.feature_image_attributes.id',
+          'data.profile.link_text', 'data.profile.link_url','data.profile.background_image_opacity',
+          'data.profile.background_color','data.urls.web.project','data.creator.slug','data.photo.full', 'data.photo.ed',
+          'data.photo.med','data.photo.little','data.photo.small','data.photo.thumb',
+          'data.photo.1024x576','data.photo.1536x864','data.profile.blurb', 'data.creator.is_registered',
+          'data.creator.chosen_currency','data.profile.name','data.profile.text_color', 'data.profile.link_background_color',
+          'data.profile.link_text_color'], axis=1, inplace=True)
+df2.isna().sum()
+df2.dropna(how='any', inplace=True)
+df2.isna().sum()
+
+df3.columns
+df3.drop(['data.friends', 'data.is_starred', 'data.is_backing','data.permissions','data.urls.api.star',
+          'data.urls.api.message_creator','data.urls.web.message_creator','data.profile.background_image_attributes.id',
+          'data.profile.background_image_attributes.image_urls.default','data.creator.slug',
+          'data.profile.background_image_attributes.image_urls.baseball_card',
+         'data.profile.feature_image_attributes.id', 'data.profile.link_text', 'data.profile.link_url',
+          'data.profile.background_image_opacity', 'data.profile.background_color','data.photo.full', 'data.photo.ed',
+          'data.photo.med','data.photo.little','data.photo.small','data.photo.thumb',
+          'data.photo.1024x576','data.photo.1536x864','data.profile.blurb', 'data.creator.is_registered',
+          'data.creator.chosen_currency','data.profile.name','data.urls.web.project','data.profile.text_color',
+          'data.profile.link_background_color', 'data.profile.link_text_color'], axis=1, inplace=True)
+df3.isna().sum()
+df3.dropna(how='any', inplace=True)
+df3.isna().sum()
+
+df4.columns
+df4.drop(['data.friends', 'data.is_starred', 'data.is_backing','data.permissions','data.urls.api.star',
+          'data.urls.api.message_creator','data.urls.web.message_creator','data.profile.background_image_attributes.id',
+          'data.profile.background_image_attributes.image_urls.default','data.urls.web.project', 'data.creator.slug',
+          'data.profile.background_image_attributes.image_urls.baseball_card','data.profile.feature_image_attributes.id',
+          'data.profile.link_text', 'data.profile.link_url','data.profile.background_image_opacity',
+          'data.profile.background_color','data.photo.full', 'data.photo.ed','data.photo.med','data.photo.little',
+          'data.photo.small','data.photo.thumb','data.profile.blurb','data.creator.is_registered',
+          'data.creator.chosen_currency','data.profile.text_color', 'data.profile.link_background_color',
+          'data.profile.link_text_color','data.profile.name','data.photo.1024x576','data.photo.1536x864'], axis=1, inplace=True)
+df4.isna().sum()
+df4.dropna(how='any', inplace=True)
+df4.isna().sum()
+
+df5.columns
+df5.drop(['data.friends', 'data.is_starred', 'data.is_backing','data.permissions','data.urls.api.star',
+          'data.urls.api.message_creator','data.urls.web.message_creator','data.profile.background_image_attributes.id',
+          'data.profile.background_image_attributes.image_urls.default','data.creator.slug',
+          'data.profile.background_image_attributes.image_urls.baseball_card','data.profile.feature_image_attributes.id',
+          'data.profile.link_text', 'data.profile.link_url','data.profile.background_image_opacity',
+          'data.profile.background_color','data.photo.full', 'data.photo.ed','data.photo.med','data.photo.little',
+          'data.photo.small','data.photo.thumb','data.photo.1024x576','data.photo.1536x864','data.urls.web.project',
+          'data.profile.blurb', 'data.creator.is_registered', 'data.creator.chosen_currency',
+          'data.profile.name','data.profile.text_color','data.profile.link_background_color',
+          'data.profile.link_text_color'], axis=1, inplace=True)
+df5.isna().sum()
+df5.dropna(how='any', inplace=True)
+df5.isna().sum()
+
+df6.columns
+df6.drop(['data.friends', 'data.is_starred', 'data.is_backing','data.permissions','data.urls.api.star',
+          'data.urls.api.message_creator','data.urls.web.message_creator','data.profile.background_image_attributes.id',
+          'data.profile.background_image_attributes.image_urls.default','data.creator.slug',
+          'data.profile.background_image_attributes.image_urls.baseball_card','data.profile.feature_image_attributes.id',
+          'data.profile.link_text', 'data.profile.link_url','data.profile.background_image_opacity',
+          'data.profile.background_color','data.photo.full', 'data.photo.ed','data.photo.med','data.photo.little',
+          'data.photo.small','data.photo.thumb','data.profile.blurb', 'data.creator.is_registered',
+          'data.creator.chosen_currency',
+          'data.profile.name','data.profile.text_color', 'data.profile.link_background_color', 'data.profile.link_text_color',
+          'data.photo.1024x576','data.photo.1536x864',
+          'data.urls.web.project'], axis=1, inplace=True)
+df6.isna().sum()
+df6.dropna(how='any', inplace=True)
+df6.isna().sum()
+
+df7.columns
+df7.drop(['data.friends', 'data.is_starred', 'data.is_backing','data.permissions','data.urls.api.star',
+          'data.urls.api.message_creator','data.urls.web.message_creator','data.profile.background_image_attributes.id',
+          'data.profile.background_image_attributes.image_urls.default','data.profile.background_image_opacity',
+          'data.profile.background_color','data.creator.slug',
+          'data.urls.web.project','data.photo.full', 'data.photo.ed','data.photo.med','data.photo.little',
+          'data.photo.small','data.photo.thumb','data.profile.blurb', 'data.creator.is_registered',
+          'data.creator.chosen_currency',
+          'data.profile.name','data.profile.text_color', 'data.profile.link_background_color', 'data.profile.link_text_color',
+          'data.photo.1024x576','data.photo.1536x864',
+          'data.profile.background_image_attributes.image_urls.baseball_card','data.profile.feature_image_attributes.id',
+          'data.profile.link_text', 'data.profile.link_url'], axis=1, inplace=True)
+df7.isna().sum()
+df7.dropna(how='any', inplace=True)
+df7.isna().sum()
+
+df8.columns
+df8.drop(['data.friends', 'data.is_starred', 'data.is_backing','data.permissions','data.urls.api.star',
+          'data.urls.api.message_creator','data.urls.web.message_creator','data.profile.background_image_attributes.id',
+          'data.profile.background_image_attributes.image_urls.default','data.profile.feature_image_attributes.id',
+          'data.profile.link_text', 'data.profile.link_url','data.profile.background_image_opacity',
+          'data.profile.background_color','data.creator.slug','data.photo.full', 'data.photo.ed','data.photo.med',
+          'data.photo.little','data.photo.small','data.photo.thumb','data.profile.blurb','data.creator.is_registered',
+          'data.creator.chosen_currency','data.profile.text_color','data.profile.link_background_color',
+          'data.profile.link_text_color','data.profile.name','data.photo.1024x576','data.photo.1536x864',
+          'data.urls.web.project',
+          'data.profile.background_image_attributes.image_urls.baseball_card'], axis=1, inplace=True)
+df8.isna().sum()
+df8.dropna(how='any', inplace=True)
+df8.isna().sum()
+
+df9.columns
+df9.drop(['data.friends', 'data.is_starred', 'data.is_backing','data.permissions','data.urls.api.star',
+          'data.profile.background_image_attributes.id','data.profile.background_image_attributes.image_urls.default',
+          'data.profile.background_image_attributes.image_urls.baseball_card','data.profile.feature_image_attributes.id',
+          'data.profile.link_text','data.profile.link_url','data.profile.background_image_opacity',
+          'data.profile.background_color','data.profile.blurb', 'data.creator.is_registered', 'data.creator.chosen_currency',
+          'data.profile.name','data.profile.text_color', 'data.profile.link_background_color', 'data.profile.link_text_color',
+          'data.urls.web.project','data.creator.slug','data.photo.full', 'data.photo.ed','data.photo.med',
+          'data.photo.little','data.photo.small','data.photo.thumb',
+          'data.photo.1024x576','data.photo.1536x864',
+          'data.urls.api.message_creator','data.urls.web.message_creator'], axis=1, inplace=True)
+df9.isna().sum()
+df9.dropna(how='any', inplace=True)
+df9.isna().sum()
+
+df10.columns
+df10.drop(['data.friends', 'data.is_starred', 'data.is_backing','data.permissions','data.urls.api.star',
+          'data.urls.api.message_creator','data.urls.web.message_creator','data.profile.background_image_attributes.id',
+           'data.profile.background_image_attributes.image_urls.default','data.profile.feature_image_attributes.id',
+           'data.profile.link_text', 'data.profile.link_url','data.profile.background_image_opacity',
+           'data.profile.background_color', 'data.creator.slug',
+          'data.urls.web.project','data.photo.full', 'data.photo.ed','data.photo.med','data.photo.little','data.photo.small',
+           'data.photo.thumb','data.profile.blurb', 'data.creator.is_registered', 'data.creator.chosen_currency',
+          'data.profile.name','data.profile.text_color', 'data.profile.link_background_color', 'data.profile.link_text_color'
+          'data.photo.1024x576','data.photo.1536x864','data.profile.background_image_attributes.image_urls.baseball_card'],
+          axis=1, inplace=True)
+df10.isna().sum()
+df10.dropna(how='any', inplace=True)
+df10.isna().sum()
+
+df11.columns
+df11.drop(['data.friends', 'data.is_starred', 'data.is_backing','data.permissions','data.urls.api.star',
+          'data.urls.api.message_creator','data.urls.web.message_creator','data.profile.background_image_attributes.id',
+           'data.profile.background_image_attributes.image_urls.default','data.profile.feature_image_attributes.id',
+           'data.profile.link_text','data.profile.link_url','data.profile.background_image_opacity',
+           'data.profile.background_color','data.profile.blurb', 'data.creator.is_registered', 'data.creator.chosen_currency',
+          'data.profile.name','data.profile.text_color', 'data.profile.link_background_color', 'data.profile.link_text_color',
+          'data.urls.web.project','data.creator.slug','data.photo.full', 'data.photo.ed','data.photo.med',
+           'data.photo.little','data.photo.small','data.photo.thumb',
+          'data.photo.1024x576','data.photo.1536x864',
+          'data.profile.background_image_attributes.image_urls.baseball_card'], axis=1, inplace=True)
+df11.isna().sum()
+df11.dropna(how='any', inplace=True)
+df11.isna().sum()
+
+df12.columns
+df12.drop(['data.friends', 'data.is_starred', 'data.is_backing','data.permissions','data.urls.api.star',
+          'data.urls.api.message_creator','data.urls.web.message_creator','data.profile.background_image_attributes.id',
+           'data.profile.background_image_attributes.image_urls.default','data.profile.feature_image_attributes.id',
+           'data.profile.link_text','data.profile.link_url','data.profile.background_image_opacity',
+           'data.profile.background_color','data.photo.full', 'data.photo.ed','data.photo.med','data.photo.little',
+           'data.photo.small','data.photo.thumb','data.profile.blurb','data.creator.is_registered',
+           'data.creator.chosen_currency',
+          'data.profile.name','data.profile.text_color', 'data.profile.link_background_color', 'data.profile.link_text_color',
+          'data.photo.1024x576','data.photo.1536x864',
+          'data.urls.web.project','data.creator.slug',
+          'data.profile.background_image_attributes.image_urls.baseball_card'], axis=1, inplace=True)
+df12.isna().sum()
+df12.dropna(how='any', inplace=True)
+df12.isna().sum()
+
+Supression de colonnes supplémentaires présentes que dans certains df
+
+df6.drop(['data.creator.is_superbacker','data.urls.api.message_threads','data.unseen_activity_count',
+          'data.unread_messages_count'], axis=1, inplace=True)
+df7.drop(['data.creator.is_superbacker'], axis=1, inplace=True)
+df8.drop(['data.creator.is_superbacker'], axis=1, inplace=True)
+df9.drop(['data.creator.is_superbacker'], axis=1, inplace=True)
+df10.drop(['data.creator.is_superbacker'], axis=1, inplace=True)
+df11.drop(['data.creator.is_superbacker'], axis=1, inplace=True)
+df12.drop(['data.creator.is_superbacker'], axis=1, inplace=True)
+
+Nouvel enregistrement des fichiers cleaned en csv.
+
+df1.to_csv( "df_2019_1_cleaned.csv", index=False, encoding='utf-8-sig')
+df2.to_csv( "df_2019_2_cleaned.csv", index=False, encoding='utf-8-sig')
+df3.to_csv( "df_2019_3_cleaned.csv", index=False, encoding='utf-8-sig')
+df4.to_csv( "df_2019_4_cleaned.csv", index=False, encoding='utf-8-sig')
+df5.to_csv( "df_2019_5_cleaned.csv", index=False, encoding='utf-8-sig')
+df6.to_csv( "df_2019_6_cleaned.csv", index=False, encoding='utf-8-sig')
+df7.to_csv( "df_2019_7_cleaned.csv", index=False, encoding='utf-8-sig')
+df8.to_csv( "df_2019_8_cleaned.csv", index=False, encoding='utf-8-sig')
+df9.to_csv( "df_2019_9_cleaned.csv", index=False, encoding='utf-8-sig')
+df10.to_csv( "df_2019_10_cleaned.csv", index=False, encoding='utf-8-sig')
+df11.to_csv( "df_2019_11_cleaned.csv", index=False, encoding='utf-8-sig')
+df12.to_csv( "df_2019_12_cleaned.csv", index=False, encoding='utf-8-sig')
+
+Ci dessous, nous combinons les fichiers "cleaned" dans un fichier annuel.
+
+os.chdir("C:/Windows/System32/01KICKSTARTER PROJECT")
+Kickstarter2019json2 = ['df_2019_1_cleaned', 'df_2019_2_cleaned','df_2019_3_cleaned', 'df_2019_4_cleaned', 'df_2019_5_cleaned',
+                        'df_2019_6_cleaned', 'df_2019_7_cleaned', 'df_2019_8_cleaned', 'df_2019_9_cleaned',
+                        'df_2019_10_cleaned', 'df_2019_11_cleaned', 'df_2019_12_cleaned']
+extension = 'csv'
+Kickstarter2019json2 = [i for i in glob.glob('*.{}'.format(extension))]
+combined_csv = pd.concat([pd.read_csv(f) for f in Kickstarter2019json2])
+combined_csv.to_csv( "combined_json_2019_cleaned.csv", index=False, encoding='utf-8-sig')
+
+Ensuite, nous lecture et affichage du df pour vérifier que tout va bien.
+
+df = pd.read_csv('combined_json_2019_cleaned.csv')
+df.head()
+df.columns
+
+Puis, nous checkons s'il reste des valeurs manquantes ou non.
+Il en reste, ainsi que quelques colonnes vides à supprimer (problablement du au fait d'avoir combiner les fichiers).
+
+df.isna().sum()
+df.drop(['robot_id', 'data.profile.should_show_feature_image_section',
+         'data.profile.feature_image_attributes.image_urls.default',
+          'data.profile.feature_image_attributes.image_urls.baseball_card','data.country_displayable_name', 'data.location.expanded_country', 'data.currency_symbol',
+          'data.currency_trailing_code'], axis=1, inplace=True)
+df.isna().sum()
+
+Ensuite nous enlevons les colonnes qui apparaissent immédiatement comme non pertinentes pour le projet.
+
+df.drop(['data.source_url', 'data.creator.avatar.small', 'data.creator.avatar.medium',
+          'data.creator.urls.web.user','data.creator.urls.api.user','data.location.urls.web.discover',
+         'data.location.urls.web.location','data.location.urls.api.nearby_projects','data.category.color',
+         'data.category.urls.web.discover',
+        'data.location.slug','data.location.short_name','data.location.displayable_name','data.location.localized_name']
+        , axis=1, inplace=True)
+        
+Enregistrement du premier fichier clean annuel en csv.
+
+df.to_csv( "df_2019_cleaned.csv", index=False, encoding='utf-8-sig')
+
+Un dernier test. Il n'y a plus de valeurs manquantes.
+
+df_test = pd.read_csv('df_2019_cleaned.csv')
+df_test.head()
+df_test.isna().sum()
+
+Un premier fichier regroupé est prêt à être exploité.
