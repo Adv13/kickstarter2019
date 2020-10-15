@@ -1,0 +1,102 @@
+
+Dans cette partie, nous allons afficher plusieurs graphiques afin d'analyser les liens de cause à effet potientiels entre plusieurs variables.
+
+df_dataviz = pd.read_csv('df_2019_kickstarter_official2.csv')
+pd.set_option('display.max_columns', None)
+df_dataviz.head()
+
+Observons la répartition du statut des campagnes pour l'année 2019.
+sns.countplot(x = "data.state", data= df_dataviz);
+
+Regardons la provenance des campagnes créées.
+sns.countplot(x = "data.country", data= df_dataviz);
+
+Regardons la provenance des dons.
+sns.countplot(x='data.usd_type', data=df_dataviz);
+
+Observons le statut des campagnes en fonction du pays de création.
+sns.countplot(x="data.country", hue ="data.state", data=df_dataviz);
+
+Observons les catégories des campagnes.
+plt.figure(figsize=(150,20))
+sns.countplot(x = "data.category.name", data=df_dataviz);
+df_dataviz['data.category.name'].value_counts()
+
+Observons le statut des campagnes par catégorie.
+plt.figure(figsize=(150,20))
+sns.countplot(x = "data.category.name", hue='data.state', data= df_dataviz);
+
+Observons les catégories en fonction du fait que les campagnes soient sélectionnées, ou non, par le staff.
+plt.figure(figsize=(150,20))
+sns.countplot(x = "data.category.name", hue='data.staff_pick', data= df_dataviz);
+
+Est ce que le fait que ces campagnes soient sélectionnées par le staff favorise leur succès ? Regardons ça.
+plt.figure(figsize=(50,10))
+sns.countplot(x = "data.staff_pick", hue='data.state', data= df_dataviz);
+
+Regardons le statut des campagnes selon leur catégorie et en fonction de Staff_pick.
+sns.relplot(x='data.state', y='data.category.name', hue='data.staff_pick', data=df_dataviz);
+
+Regardons le fait d'être staff_pick en fonction du pays.
+sns.countplot(x="data.country", hue ="data.staff_pick", data=df_dataviz);
+
+Est-ce que la situation géographique est permet à elle seule d'expliquer ces résultats ?
+Est-ce que le moment ou la campagne est lancée influence le fait qu'elle soit à succès ou non?
+Regardons cela avec les graphiques suivants.
+plt.figure(figsize=(30,10))
+sns.countplot(x="data.state", hue ="launched_time_date_month", data=df_dataviz);
+plt.figure(figsize=(30,10))
+sns.countplot(x="data.state", hue ="launched_time_date_weekday", data=df_dataviz);
+
+Afin d'analyser toujours plus en profondeur, nous pouvons nous demander quelles autres variables pourraient potentiellement influencer sur le succès d'une campagne.
+Essayons de creuser un peu plus l'importance de la variable data.goal ci-dessous.
+Après tout, un objectif de 100 000 ce n'est pas la même chose qu'un objectif de 10 000.
+
+pd.set_option('display.max_rows', None)
+df_dataviz['data.goal'].value_counts()
+Nous avons visiblement besoin de regrouper les valeurs ici aussi.
+quantiles = pd.qcut(df_dataviz['data.goal'], 4, labels=False) 
+df_dataviz = df_dataviz.assign(quantile=quantiles.values) 
+Le code ci-dessus permet de créer une nouvelle colonne "quantile" dans laquelle les valeurs de data.goal ont été réparties en quantile tel que :
+
+0,00 à 0,25 = 0
+0,25 à 0,50 = 1
+0,50 à 0,75 = 2
+0,75 à 1,00 = 3
+
+sns.countplot(x="data.state", hue ='quantile' , data=df_dataviz);
+sns.countplot(x="data.staff_pick", hue ='quantile' , data=df_dataviz);
+
+Regardons le statut des campagnes selon la catégorie et en fonction de leur objectif financier.
+sns.relplot(x='quantile', y='data.category.name', hue='data.state', data=df_dataviz);
+
+Refaisons ce graphique en enlevant canceled, live et suspended de l'équation.
+indexCanceled = df_dataviz[ df_dataviz['data.state'] == 'canceled' ].index
+indexLive = df_dataviz[ df_dataviz['data.state'] == 'live' ].index
+indexSuspended = df_dataviz[ df_dataviz['data.state'] == 'suspended' ].index
+
+df_dataviz.drop(indexCanceled , inplace=True)
+df_dataviz.drop(indexLive , inplace=True)
+df_dataviz.drop(indexSuspended , inplace=True)
+
+sns.relplot(x='quantile', y='data.category.name', hue='data.state', data=df_dataviz);
+
+Regardons maintenant le statut des campagnes selon leur objectif financier et en fonction de staff_pick.
+sns.relplot(x='data.state', y='quantile', hue='data.staff_pick', data=df_dataviz);
+
+Avec le montant estimé reçu :
+quantiles2 = pd.qcut(df_dataviz['data.pledged'], 4, labels=False) 
+df_dataviz = df_dataviz.assign(quantile2=quantiles2.values)
+Le code ci-dessus permet de créer une nouvelle colonne "quantile2" dans laquelle les valeurs de data.pledged ont été réparties en quantile tel que :
+
+0,00 à 0,25 = 0
+0,25 à 0,50 = 1
+0,50 à 0,75 = 2
+0,75 à 1,00 = 3
+sns.countplot(x="data.staff_pick", hue ='quantile2' , data=df_dataviz);
+
+Regardons le statut des campagnes selon leur catégorie et en fonction de l'objectif financier et le fait qu'elles soient staff_pick ou non.
+sns.relplot(x="data.state", y="data.category.name", hue='quantile', size='data.staff_pick', data=df_dataviz);
+
+Maintenant, regardons le statut des campagnes selon leur catégorie et en fonction de l'objectif estimé obtenu et le fait qu'elles soient staff_pick ou non.
+sns.relplot(x="data.state", y="data.category.name", hue='quantile2', size='data.staff_pick', data=df_dataviz);
