@@ -1,0 +1,164 @@
+On fait un backup au cas ou.
+
+df2 = df.copy()
+
+On rend les colonnes contenant les infos sur les dates lisibles pour un humain grâce à pd.to_datetime.
+
+df['created_time_date']=pd.to_datetime(df['data.created_at'], unit='s')
+df['launched_time_date']=pd.to_datetime(df['data.launched_at'], unit='s')
+df['profile_state_changed_time_date']=pd.to_datetime(df['data.profile.state_changed_at'], unit='s')
+df['state_changed_time_date']=pd.to_datetime(df['data.state_changed_at'], unit='s')
+df['deadline_time_date']=pd.to_datetime(df['data.deadline'], unit='s')
+
+df.head()
+
+On ajoute des colonnes pour avoir le mois de création/lancement du projet et nous remarquons que les deux colonnes donnent le même mois donc on décide d'en supprimer une.
+
+df['launched_time_date_month'] = df['created_time_date'].dt.month
+df['created_time_date_month'] = df['created_time_date'].dt.month
+
+Même constat pour les colonnes de changed state et de deadline.
+
+df['deadline_time_date_month'] = df2['deadline_time_date'].dt.month
+df['state_changed_time_date_month'] = df2['state_changed_time_date'].dt.month
+
+df.drop(['data.deadline', 'data.state_changed_at', 'data.created_at','data.launched_at','created_time_date_month',
+          'state_changed_time_date_month','profile_state_changed_time_date'], axis=1, inplace=True)
+          
+On décide d'extraire aussi le jour de la semaine pour une éventuelle étude plus approfondie ensuite.
+
+df['launched_time_date_weekday'] = df['created_time_date'].dt.weekday
+df['deadline_time_date_weekday'] = df['deadline_time_date'].dt.weekday
+
+Après relecture, on décide de supprimer encore quelques colonnes non pertinentes.
+
+df.drop(['table_id', 'run_id'], axis=1, inplace=True)
+
+Un premier fichier csv backup officiel est créé ensuite.
+
+df.to_csv( "df_2019_kickstarter_official.csv", index=False, encoding='utf-8-sig')
+
+La colonne 'data.category.name' est pertinente pour le projet mais contient BEAUCOUP de valeurs uniques.
+Un regroupement des valeurs s'impose. Celui-ci est fait sur la base de l'analyse des catégories du df.
+
+df['data.category.name'].value_counts()
+
+df['data.category.name'].replace(['Comic Books','Children\'s Books','Photobooks','Art Books','Cookbooks',
+                                       'Romance','Translations'],['Books','Books','Books','Books','Books',
+                                                                  'Books','Books',], inplace=True)
+
+
+df['data.category.name'].replace(['Country & Folk','Rock','Indie Rock','Pop','Classical Music','Electronic Music','Hip-Hop',
+                             'Jazz','World Music','Sound','Music Videos','Music','Audio','Punk','Blues'],
+                            ['Music','Music','Music','Music','Music','Music','Music','Music','Music','Music',
+                             'Music','Music','Music','Music','Music'], inplace=True)
+
+df['data.category.name'].replace(['Printing','Publishing','Literary Journals','Comics','Calendars',
+                                       'Print','Periodicals'],['Books','Books','Books','Books','Books','Books','Books',],
+                            inplace=True)
+
+df['data.category.name'].replace(['Drinks','Restaurants','Food Trucks','Farms','Vegan',
+                                       'Food','Farmer\'s Markets','Bacon'],
+                            ['Food & Drinks','Food & Drinks','Food & Drinks','Food & Drinks',
+                             'Food & Drinks','Food & Drinks','Food & Drinks','Food & Drinks'],
+                            inplace=True)
+
+df['data.category.name'].replace(['Tabletop Games','Playing Cards','Video Games','Mobile Games','Plays',
+                                       'Live Games'],['Video Games & Games','Video Games & Games','Video Games & Games',
+                                                      'Video Games & Games','Video Games & Games','Video Games & Games',],
+                            inplace=True)
+
+df['data.category.name'].replace(['Games'],['Video Games & Games'], inplace=True)
+
+
+df['data.category.name'].replace(['Video Art','Film & Video','Video','Television','Narrative Film',
+                                       'Webseries','Documentary'],['Video, Films & Series','Video, Films & Series','Video, Films & Series',
+                                                      'Video, Films & Series','Video, Films & Series',
+                                                                   'Video, Films & Series','Video, Films & Series'],
+                            inplace=True)
+
+df['data.category.name'].replace(['Product Design','Illustration','Video','Graphic Novels','Graphic Design',
+                                       'Digital Art','Webcomics','3D Printing','Interactive Design','Civic Design','Design'],
+                                 ['Graphism & Design','Graphism & Design','Graphism & Design',
+                                                      'Graphism & Design','Graphism & Design','Graphism & Design',
+                'Graphism & Design','Graphism & Design','Graphism & Design','Graphism & Design','Graphism & Design'],
+                            inplace=True)
+
+df['data.category.name'].replace(['Public Art','Painting','Performance Art','Sculpture','Performances',
+                                       'Musical','Dance','Fine Art','Conceptual Art','Art','Theater'],['Art','Art','Art',
+                                                      'Art','Art','Art','Art','Art','Art','Art','Art'],
+                            inplace=True)
+
+df['data.category.name'].replace(['Fashion','Childrenswear','Ceramics',
+                                       'Textiles','Couture','Knitting ','Crochet','Pottery','Embroidery'],
+                                 ['Embroidery, Fashion & Co', 'Embroidery, Fashion & Co','Embroidery, Fashion & Co','Embroidery, Fashion & Co',
+                            'Embroidery, Fashion & Co','Embroidery, Fashion & Co','Embroidery, Fashion & Co',
+                                  'Embroidery, Fashion & Co','Embroidery, Fashion & Co'],
+                            inplace=True)
+
+df['data.category.name'].replace(['Fashion','Jewelry','Woodworking',
+                                       'DIY','Poetry','Crafts','Candles','Puzzles','Glass'],['Crafts & Creations',
+                                                      'Crafts & Creations','Crafts & Creations','Crafts & Creations',
+                            'Crafts & Creations','Crafts & Creations','Crafts & Creations','Crafts & Creations',
+                                                                                             'Crafts & Creations'], inplace=True)
+
+df['data.category.name'].replace(['Metal'],['Music'], inplace=True)
+df['data.category.name'].replace(['Zines'],['Video Games & Games'], inplace=True)
+df['data.category.name'].replace(['Small Batch'],['Food & Drinks'], inplace=True)
+df['data.category.name'].replace(['Knitting'],['Embroidery, Fashion & Co'], inplace=True)
+df['data.category.name'].replace(['Fabrication Tools'],['Crafts & Creations'], inplace=True)
+df['data.category.name'].replace(['Movie Theaters'],['Video, Films & Series'], inplace=True)
+df['data.category.name'].replace(['Installations','Photography','Photo'],['Art','Art','Art'], inplace=True)
+df['data.category.name'].replace(['Flight'],['Technology'], inplace=True)
+df['data.category.name'].replace(['Anthologies','Journalism','Academic'],['Journalism, Anthologies & Academic',
+                                                                     'Journalism, Anthologies & Academic',
+                                                                     'Journalism, Anthologies & Academic'], inplace=True)
+df['data.category.name'].replace(['Space Exploration'],['Technology'], inplace=True)
+df['data.category.name'].replace(['Experimental'],['Art'], inplace=True)
+df['data.category.name'].replace(['Weaving'],['Crafts & Creations'], inplace=True)
+df['data.category.name'].replace(['Radio & Podcasts'],['Journalism, Anthologies & Academic'], inplace=True)
+df['data.category.name'].replace(['Quilts'],['Embroidery, Fashion & Co'], inplace=True)
+df['data.category.name'].replace(['Social Practice','People'],['Social Practice & People','Social Practice & People'], inplace=True)
+
+
+
+df['data.category.name'].replace(['Animals','Pet Fashion'],['Animals & Pet fashion','Animals & Pet fashion'], inplace=True)
+
+df['data.category.name'].replace(['Wearables','Shorts','Footwear','Ready-to-wear'],['Embroidery, Fashion & Co',
+                                                                               'Embroidery, Fashion & Co',
+                                                                               'Embroidery, Fashion & Co',
+                                                                               'Embroidery, Fashion & Co'], inplace=True)
+
+df['data.category.name'].replace(['Immersive','Accessories','DIY Electronics',
+                                       'Gadgets','Hardware','Robots','Camera Equipment','Gaming Hardware','Technology'],['Technology',
+                                                      'Technology','Technology','Technology',
+                            'Technology','Technology','Technology','Technology','Technology'],
+                            inplace=True)
+
+df['data.category.name'].replace(['Chiptune'],['Music'], inplace=True)
+df['data.category.name'].replace(['R&B'],['Music'], inplace=True)
+df['data.category.name'].replace(['Letterpress'],['Typography'], inplace=True)
+df['data.category.name'].replace(['Shorts','Apparel'],['Embroidery, Fashion & Co','Embroidery, Fashion & Co'], inplace=True)
+
+df['data.category.name'].replace(['Web','Apps','Software'],['Web, App, & Software','Web, App, & Software',
+                                                       'Web, App, & Software'], inplace=True)
+
+df['data.category.name'].replace(['Drama','Nonfiction','Fiction','Horror','Thrillers', 'Action', 'Science Fiction','Fantasy'],
+                            ['Type (Films, books, etc)','Type (Films, books, etc)','Type (Films, books, etc)',
+                             'Type (Films, books, etc)','Type (Films, books, etc)','Type (Films, books, etc)',
+                             'Type (Films, books, etc)','Type (Films, books, etc)'], inplace=True)
+
+df['data.category.name'].replace(['Comedy','Animation'],['Type (Films, books, etc)','Type (Films, books, etc)'], inplace=True)
+
+df['data.category.name'].replace(['Family','Kids','Young Adult'],['Kids & Family','Kids & Family','Kids & Family'], inplace=True)
+
+df['data.category.name'].replace(['Literary Spaces','Residencies','Workshops','Makerspaces','Stationery','Community Gardens',
+                             'Places','Events','Spaces','Festivals'],['Events & Places','Events & Places','Events & Places',
+                                                                      'Events & Places','Events & Places','Events & Places',
+                                                                      'Events & Places','Events & Places','Events & Places',
+                                                                      'Events & Places'], inplace=True)
+                                                                      
+Enregistrement d'un fichier csv avec les categories regroupées (nous aimons les backup dans ce groupe).
+
+df.to_csv( "df_2019_kickstarter_official2.csv", index=False, encoding='utf-8-sig')
+
