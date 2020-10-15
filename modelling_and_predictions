@@ -1,0 +1,113 @@
+Lecture et affichage du df final.
+
+df_final = pd.read_csv('df_2019_prepa.csv', index_col=None)
+pd.set_option('display.max_columns', None)
+df_final.head()
+
+df_final.columns
+df_final.drop(['data.spotlight','data.id','data.pledged','data.backers_count','data.profile.state',
+               'data.disable_communication','data.creator.id','data.location.id','data.category.id','data.profile.project_id',
+               'data.profile.id'],
+              axis=1, inplace=True)
+              
+df_final.describe()
+
+from sklearn import preprocessing
+from sklearn.model_selection import train_test_split
+from sklearn.model_selection import cross_val_score
+from sklearn.metrics import mean_squared_error
+
+Une bonne méthode pour évaluer les performance d'un modèle sur un jeu de données et de séparer le jeu d'apprentissage en deux sous-ensemble, un d'apprentissage et un de validation.
+Maintenant, séparons notre travail en un jeu d'entrainement et un jeu de test.
+
+target = df_final['data.state']
+data = df_final.drop('data.state', axis=1)
+
+X_train, X_test, y_train, y_test = train_test_split(data, target, test_size = 0.2)
+
+Importation de toutes les librairies nécessaires pour la modélisation.
+
+from sklearn.preprocessing import minmax_scale
+
+
+from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
+from sklearn.preprocessing import LabelEncoder, StandardScaler
+from sklearn.pipeline import Pipeline
+from sklearn.model_selection import KFold, cross_validate
+from sklearn.metrics import accuracy_score
+
+
+import warnings
+warnings.filterwarnings("ignore")
+
+ 
+from sklearn.cluster import KMeans
+from sklearn.decomposition import PCA
+from sklearn.svm import SVC
+from sklearn.linear_model import RidgeClassifier, SGDClassifier, LogisticRegression
+from sklearn.svm import SVC, LinearSVC
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.tree import DecisionTreeClassifier
+
+
+from sklearn.feature_selection import SelectFromModel
+from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier, BaggingClassifier, VotingClassifier, RandomTreesEmbedding
+
+Dans les cellules qui suivent, nous allons ajouter à une liste nos différents modèles de classification afin de déterminer ensuite lesquels sont les plus efficaces.
+
+clfs = []
+seed = 3
+
+clfs.append(("LogReg", Pipeline([("Scaler", StandardScaler()),
+                       ("LogReg", LogisticRegression(n_jobs=-1, random_state=42))])))
+
+clfs.append(("KNN", Pipeline([("Scaler", StandardScaler()),
+                       ("KNN", KNeighborsClassifier(n_jobs=-1))]))) 
+
+clfs.append(("DecisionTreeClassifier", Pipeline([("Scaler", StandardScaler()),
+                       ("DecisionTrees", DecisionTreeClassifier(random_state=42))]))) 
+
+clfs.append(("RandomForestClassifier", Pipeline([("Scaler", StandardScaler()),
+                       ("RandomForest", RandomForestClassifier(n_estimators=200, n_jobs=-1, random_state=42))]))) 
+
+clfs.append(("GradientBoostingClassifier", Pipeline([("Scaler", StandardScaler()),
+                       ("GradientBoosting", GradientBoostingClassifier(n_estimators=200,random_state=42))]))) 
+
+clfs.append(("RidgeClassifier", Pipeline([("Scaler", StandardScaler()),
+                       ("RidgeClassifier", RidgeClassifier(random_state=42))])))
+
+clfs.append(("BaggingRidgeClassifier",Pipeline([("Scaler", StandardScaler()),
+                       ("BaggingClassifier", BaggingClassifier(n_jobs=-1, random_state=42))])))
+                       
+Sachant que notre variable cible 'data.state' est binaire, on a choisi de calculer les valeurs de l'erreur 'roc_auc' pour les differents modèles de classification choisis précédement.
+Par définition, ces valeurs sont comprises dans une plage de 0 à 1. Un modèle dont 100 % des prédictions sont erronées a un AUC de 0,0. Si toutes ses prédictions sont correctes, son AUC est de 1,0.
+
+L'AUC présente les avantages suivants :
+
+Elle est invariante d'échelle. Elle mesure la qualité du classement des prédictions, plutôt que leurs valeurs absolues. Elle est indépendante des seuils de classification.
+Elle mesure la qualité des précisions du modèle quel que soit le seuil de classification sélectionné.
+
+On a également fait le choix d'utiliser la méthode cross_val_score de skelarn permet d'évaluer les performances d'un modèle selon une fonction d'évaluation et un nombre de folds choisi ( dans notre cas il est égal à 5).
+Plus, il y aura de sous-ensembles plus le modèle sera robuste et son score sera, selon sa variance, le plus proche de la réalité.
+
+scoring = 'roc_auc'
+n_folds = 5
+results= []
+names= [] 
+
+for name, model  in clfs:
+    kfold = KFold(n_splits=n_folds, random_state=seed)
+    cv_results = cross_val_score(model, X_train, y_train, 
+                                 cv= n_folds, scoring=scoring,
+                                 n_jobs=-1)    
+    names.append(name)
+    results.append(cv_results)    
+    conclusion = "%s: %f (+/- %f)" % (name, cv_results.mean(),  cv_results.std())
+    print(conclusion)
+    
+                      
+D'après les scores ci-dessus, nous avons décidé de sélectionner les 2 modèles suivants : RandomForestClassifier et DecisionTreeClassifier.
+
+A noter que, après avoir fait de nombreux tests avec VarianceThreshold et PCA, nous avons décidé de ne pas les appliquer car nos résultats sont déjà suffisamment élevés tel quel.
+
+L'étape suivante consiste à évaluer la précision de la prédiction appliquée à notre jeu de test, on utilisant différentes métriques et nos deux modéles de classifications selectionnés.
