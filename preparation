@@ -1,0 +1,212 @@
+Transformation des colonnes pour avoir des valeurs catégorielles.
+
+df = pd.read_csv('df_2019_kickstarter_official2.csv')
+df.head()
+
+La ligne du dessous a été rajoutée pour supprimer les colonnes dates.
+Certaines avaient été effectivement supprimées plus haut mais, ce notebook étant un regroupement de plusieurs notebook, nous préférons les resupprimer ici.
+df.drop(['created_time_date', 'launched_time_date', 'profile_state_changed_time_date','state_changed_time_date',
+         'deadline_time_date'], axis=1, inplace=True)
+         
+Regrouper les données dans la variable cible en "succès" et "échec" seulement.
+df['data.state'].replace(['canceled','suspended'],['failed','failed'], inplace=True)
+df['data.state'].replace(['live'],['failed'], inplace=True) # sur la 2è ligne car j'ai hésité à le mettre dans failed au début
+
+Changer les valeurs str binaires en integers 1 et 0.
+df['data.state'].replace(['successful','failed'],['1','0'], inplace=True)
+df['data.usd_type'].replace(['domestic','international'],['1','0'], inplace=True)
+df['data.profile.state'].replace(['active','inactive'],['1','0'], inplace=True)
+
+df['data.current_currency'].value_counts() => il n'y a qu'une seule valeur évidente (USD) donc on supprime la colonne.
+Le reste est non pertinent pour le modèle donc on supprime aussi. Ainsi que quelques dernières autres colonnes non utiles.
+
+df.drop(['data.current_currency','data.urls.web.rewards','data.creator.avatar.thumb','data.photo.key','data.static_usd_rate',
+         'data.usd_pledged','data.converted_pledged_amount','data.fx_rate','data.profile.state_changed_at'], 
+        axis=1, inplace=True)
+        
+df['data.currency'].replace(['USD','GBP','EUR','CAD','AUD','MXN','SEK','HKD','DKK','NZD','SGD','CHF','NOK','JPY'],
+                            ['1','2','3','4','5','6','7','8','9','10','11','12','13','14'], inplace=True)
+
+#USD    1693629 => 1
+#GBP     268102 =>2
+#EUR     166603 => 3
+#CAD     113303 => 4
+#AUD      57414 => 5
+#MXN      28856 => 6
+#SEK      16669 => 7
+#HKD      13329 => 8
+#DKK      10635 => 9
+#NZD      10567 => 10
+#SGD       8224 => 11
+#CHF       7919 => 12
+#NOK       5903 => 13
+#JPY       4717 => 14
+
+Changer toutes les valeurs booléennes en 1 et 0.
+df["data.disable_communication"] = df["data.disable_communication"].astype(int)
+df["data.spotlight"] = df["data.spotlight"].astype(int)
+df["data.staff_pick"] = df["data.staff_pick"].astype(int)
+df["data.is_starrable"] = df["data.is_starrable"].astype(int)
+df["data.location.is_root"] = df["data.location.is_root"].astype(int)
+df["data.profile.show_feature_image"] = df["data.profile.show_feature_image"].astype(int)
+
+Backup 
+df_class = df.copy()
+
+Ici, nous supprimons des colonnes non pertinentes pour le modèle aussi mais que l'on ne voulait pas supprimer dans le df original de ce notebook.
+df_class.drop(['data.slug','data.name','data.blurb','data.location.country','data.category.slug','data.creator.name'],
+              axis=1, inplace=True)
+              
+Ensuite, on continue sur la lancée des valeurs catégorielles comme précédemment.
+df_class['data.category.name'].value_counts()
+df_class['data.category.name'].replace(['Music','Art','Books','Graphism & Design','Video Games & Games',
+                                        'Embroidery, Fashion & Co','Technology','Video, Films & Series','Web, App, & Software',
+                                        'Food & Drinks','Crafts & Creations','Events & Places',
+                                        'Journalism, Anthologies & Academic','Mixed Media','Kids & Family',
+                                        'Social Practice & People','Faith','Architecture','Animals & Pet fashion',
+                                        'Nature','Latin','Typography','Taxidermy'],
+                                 ['1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20',
+                                  '21','22','23'],
+                                 inplace=True)
+
+#Music                                 146991 => 1
+#Type (Films, books, etc)               96502 =>à supprimer
+#Art                                    86715 => 2
+#Books                                  82794 => 3
+#Graphism & Design                      82658 => 4
+#Video Games & Games                    69506 => 5
+#Embroidery, Fashion & Co               66576 => 6
+#Technology                             61329 => 7
+#Video, Films & Series                  61176 => 8
+#Web, App, & Software                   43498 => 9
+#Food & Drinks                          39999 => 10
+#Crafts & Creations                     27827 => 11
+#Events & Places                        24922 => 12
+#Journalism, Anthologies & Academic     17309 => 13
+#Mixed Media                            10264 => 14
+#Kids & Family                           7082 => 15
+#Social Practice & People                6490 => 16
+#Faith                                   5195 => 17
+#Architecture                            2440 => 18
+#Animals & Pet fashion                   2316 => 19
+#Nature                                  1811 => 20
+#Latin                                    896 => 21
+#Typography                               813 => 22
+#Taxidermy                                 60 => 23
+
+df_class['data.category.name'] = pd.to_numeric(df_class['data.category.name'], errors='coerce')
+df_class.isna().sum()
+df_class.dropna(how='any', inplace=True)
+
+Maintenant ce pose la question de la gestion des colonnes contenant les infos de pays, ville, etc.
+Elles nous semblent pertinentes pour le modèle mais elles possèdent un très grand nombre de valeurs str uniques.
+Nous faisons le choix de supprime la colonne "data.location.state" car la colonne des ville est suffisamment précise.
+Nous faisons également le choix de garder uniquement dans les colonnes data.location.name et data.country les villes et pays ayant des valeurs supérieures à 10 000 (data.location.name) et 5000 (data.location.country).
+Même si cela peut sembler réducteur de mettre de coté les valeurs moins hautes, nous avons pourtant constaté dans les graphiques précédents la très grande dominance des pays anglophones (US, GB, CA) donc cette réduction ne devrait pas beacuoup perturber l'analyse.
+
+df_class.drop(['data.location.state'], axis=1, inplace=True)
+df_class['data.location.name'].replace(['Los Angeles','London','New York','Chicago','San Francisco','Brooklyn','Seattle','Portland',
+                                 'Atlanta','Toronto','Austin','Boston','San Diego','Philadelphia','Minneapolis','Denver',
+                                  'Washington','Nashville','Dallas','Vancouver','Houston','Las Vegas','Manhattan','Melbourne',
+                                 'Paris','Sydney','Hong Kong','Orlando','Salt Lake City','Montreal','Miami','Phoenix','Columbus',
+                                 'Detroit','Edinburgh','Pittsburgh','Baltimore','Berlin'],
+                                 ['1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20',
+                                  '21','22','23','24','25','26','27','28','29','30','31','32','33','34','35','36','37','38'],
+                                 inplace=True)
+
+
+#Los Angeles                                111289 => 1
+#London                                      92303 => 2
+#New York                                    88058 => 3
+#Chicago                                     44429 => 4
+#San Francisco                               38331 => 5
+#Brooklyn                                    36609 => 6
+#Seattle                                     31508 => 7
+#Portland                                    31114 => 8
+#Atlanta                                     25478 => 9
+#Toronto                                     25415 => 10
+#Austin                                      24702 => 11
+#Boston                                      24011 => 12
+#San Diego                                   19202 => 13
+#Philadelphia                                18946 => 14
+#Minneapolis                                 18600 => 15
+#Denver                                      17500 => 16
+#Washington                                  17446 => 17
+#Nashville                                   17150 => 18
+#Dallas                                      16799 => 19
+#Vancouver                                   16730 => 20
+#Houston                                     16698 => 21
+#Las Vegas                                   15843 => 22
+#Manhattan                                   15016 => 23
+#Melbourne                                   14868 => 24
+#Paris                                       13540 => 25
+#Sydney                                      13520 => 26
+#Hong Kong                                   13056 => 27
+#Orlando                                     13010 => 28
+#Salt Lake City                              12852 => 29
+#Montreal                                    12689 => 30
+#Miami                                       12112 => 31
+#Phoenix                                     12091 => 32
+#Columbus                                    11083 => 33
+#Detroit                                     11030 => 34
+#Edinburgh                                   10952 => 35
+#Pittsburgh                                  10698 => 36
+#Baltimore                                   10420 => 37
+#Berlin                                      10071 => 38
+
+df_class['data.location.name'] = pd.to_numeric(df_class['data.location.name'], errors='coerce')
+df_class.isna().sum()
+df_class.dropna(how='any', inplace=True)
+df_class['data.location.name'].value_counts()
+df_class['data.location.type'].replace(['Town','County','Suburb','LocalAdmin','Island','Msicellaneous','Estate'],
+                                 ['1','2','3','4','5','6','7'], inplace=True)
+
+#Town             2239174 => 1
+#County             89489 => 2
+#Suburb             59892 => 3
+#LocalAdmin         14277 => 4
+#Island              2785 => 5
+#Miscellaneous        201 => 6
+#Estate                52 => 7
+
+df_class['data.country'].value_counts()
+
+df_class['data.country'].replace(['US','GB','CA','AU','FR','HK','DE','IT','NL','DK','ES','SE','BE','IE','CH','NZ',
+                                  'MX','NO','JP','SG','AT','LU'],
+                                 ['1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20','21','22'],
+                                 inplace=True)
+
+#US    1641933 => 1
+#GB     259718 => 2
+#CA     109668 => 3
+#AU      54972 => 4
+#DE      39687 => 5
+#FR      32032 => 6
+#MX      30954 => 7
+#IT      29546 => 8
+#ES      24624 => 9
+#NL      19845 => 10
+#SE      16520 => 11
+#HK      13218 => 12
+#NZ      10703 => 13
+#DK      10404 => 14
+#JP       9221 => 15
+#SG       7981 => 16
+#CH       7908 => 17
+#IE       7562 => 18
+#BE       6198 => 19
+#NO       5907 => 20
+#AT       5657 => 21
+#LU         24 => 22
+
+df_class.isna().sum()
+df_class.info()
+
+Ce n'est pas le cas donc nous le faisons manuellement.
+df_class = df_class.apply(pd.to_numeric)
+
+Ensuite, une dernière vérification.
+df_class.info()
+
+Enregistrement du fichier de preparation dans un autre fichier csv.
+df_class.to_csv( "df_2019_prepa.csv", index=False, encoding='utf-8-sig')
